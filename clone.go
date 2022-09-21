@@ -76,7 +76,18 @@ type NotebookVar struct {
 func (c *CloneCmd) Run(opts *Options) error {
 	fmt.Printf("Cloning notebook %d\n", c.ID)
 
-	ctx := datadog.NewDefaultContext(context.Background())
+	ctx := context.WithValue(
+        context.Background(),
+        datadog.ContextAPIKeys,
+        map[string]datadog.APIKey{
+            "apiKeyAuth": {
+                Key: os.Getenv("DD_CLIENT_API_KEY"),
+            },
+            "appKeyAuth": {
+                Key: os.Getenv("DD_CLIENT_APP_KEY"),
+            },
+        },
+    )
 	configuration := datadog.NewConfiguration()
 	apiClient := datadog.NewAPIClient(configuration)
 	api := datadogV1.NewNotebooksApi(apiClient)
